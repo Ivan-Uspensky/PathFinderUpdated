@@ -7,9 +7,14 @@ public class Unit : MonoBehaviour {
 	
 	public Transform target;
 	public float speed = 20;
+	public float minWeaponRange = 1f;
+	public float maxWeaponRange = 2f;
+
+	public bool displayGridGizmos;
 
 	CustomGrid grid;
 	GameObject go;
+	Animator animator;
 	GunController gunController;
 
 	Vector2[] path;
@@ -20,9 +25,12 @@ public class Unit : MonoBehaviour {
 	Vector2 direction;
 	Vector2 rotation;
 
+	float animationSpeedPercent;
+
 	void Awake() {
 		go = GameObject.Find ("Pathfinder");
 		grid = go.GetComponent<CustomGrid>();
+		animator = GetComponentInChildren<Animator>();
 		gunController = GetComponent<GunController>();
 	}
 
@@ -55,6 +63,9 @@ public class Unit : MonoBehaviour {
 				if ((Vector2)transform.position == currentWaypoint) {
 					targetIndex++;
 					if (targetIndex >= path.Length) {
+						// Debug.Log("ololo");
+						animationSpeedPercent = 0;
+						animator.SetFloat("Blend", animationSpeedPercent);
 						yield break;
 					}
 					currentWaypoint = path [targetIndex];
@@ -62,6 +73,7 @@ public class Unit : MonoBehaviour {
 
 				//rotation
 				direction = (currentWaypoint - (Vector2)transform.position).normalized;
+				// Debug.Log(direction);
 				rotation = new Vector2( transform.eulerAngles.x, transform.eulerAngles.y );
 
 				if (direction != Vector2.right && rotation.y == 0) {
@@ -72,7 +84,11 @@ public class Unit : MonoBehaviour {
 				} 
 
 				// transform.position = Vector2.MoveTowards (transform.position, currentWaypoint, speed * Time.deltaTime);
-				transform.position = Vector3.MoveTowards (transform.position, new Vector3(currentWaypoint.x, currentWaypoint.y, -0.5f), speed * Time.deltaTime);
+				transform.position = Vector3.MoveTowards (transform.position, new Vector3(currentWaypoint.x, currentWaypoint.y, -0.15f), speed * Time.deltaTime);
+				//
+				animationSpeedPercent = 0.5f * direction.magnitude;
+				animator.SetFloat("Blend", animationSpeedPercent);
+				
 				yield return null;
 
 			}
@@ -83,7 +99,7 @@ public class Unit : MonoBehaviour {
 		if (path != null) {
 			for (int i = targetIndex; i < path.Length; i ++) {
 				Gizmos.color = Color.black;
-				//Gizmos.DrawCube((Vector3)path[i], Vector3.one *.5f);
+				// Gizmos.DrawCube((Vector3)path[i], Vector3.one *.5f);
 
 				if (i == targetIndex) {
 					Gizmos.DrawLine(transform.position, path[i]);
@@ -92,6 +108,12 @@ public class Unit : MonoBehaviour {
 					Gizmos.DrawLine(path[i-1],path[i]);
 				}
 			}
+		}
+		if (displayGridGizmos) {
+			Gizmos.color = new Color (1, 0, 0, .3f);
+        	Gizmos.DrawCube(transform.position, new Vector3(minWeaponRange, .5f, .08f));
+			Gizmos.color = new Color (1, 0, 1, .3f);
+			Gizmos.DrawCube(transform.position, new Vector3(maxWeaponRange, .5f, .05f));
 		}
 	}
 }

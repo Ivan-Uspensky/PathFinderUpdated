@@ -134,7 +134,7 @@ public class CustomGrid : MonoBehaviour {
 				if (n.walkable)
 					Gizmos.color = Color.white;
 
-				Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter-.1f));
+				Gizmos.DrawCube(n.worldPosition, new Vector3(nodeDiameter - 0.05f, nodeDiameter - 0.05f, 0.1f));
 			}
 		}
 	}
